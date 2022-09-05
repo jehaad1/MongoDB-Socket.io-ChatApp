@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io & MongoDB</title>
+    <link rel="stylesheet" href="./assets/style.css">
+</head>
+
+<body>
+    <div id="view">
+        <ul id="chat"></ul>
+    </div>
+    <div id="taskbar">
+        <input id="input" placeholder="Your Message.." />
+        <button id="button">Send Message</button>
+    </div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+    let name = prompt("What's Your Name?");
+    if(name) socket.emit('user-connect', name);
+    socket.on("user-disconnected", (data) => {
+        viewMessage(data + " Left The Chat");
+    });
+    socket.on("user-connected", (data) => {
+        viewMessage(data.name + " Joined The Chat");
+    });
+    socket.on("view-messages", (data) => {
+        data.forEach((message) => {
+            if(Object.keys(message)[0] === name) return viewMessage("You", Object.values(message)[0], true);
+            viewMessage(Object.keys(message)[0], Object.values(message)[0]);
+        })
+    })
+    socket.on("view-message", (data) => {
+        viewMessage(Object.keys(data)[0], Object.values(data)[0]);
+    })
+
+    let chat = document.getElementById("chat");
+    let view = document.getElementById("view");
+    let button = document.getElementById("button");
+    let input = document.getElementById("input");
+
+    function viewMessage(author, message, mymessages) {
+        let li = document.createElement("li");
+        li.id = "message";
+        if (mymessages) li.className = "mymessages";
+        let username = document.createElement("h3");
+        username.innerText = author;
+        li.appendChild(username);
+        let content = document.createElement("p");
+        content.innerText = message ? message : "";
+        li.appendChild(content);
+        chat.appendChild(li);
+        view.scrollTo(0, 99999999999999999999999999);
+    };
+    button.addEventListener("click", () => {
+        if (!input.value) return;
+        viewMessage("You", input.value, true);
+        socket.emit("send-message", {
+            [name]: input.value
+        });
+        input.value = "";
+    });
+</script>
+
+</html>
