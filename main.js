@@ -5,7 +5,7 @@ const httpServer = http.createServer(app);
 const { Database } = require("quickmongo");
 const { Server } = require("socket.io");
 const io = new Server(httpServer);
-const db = new Database("mongodb+srv://jehaadd:jehaad100jehaad@cluster0.g5yiodx.mongodb.net/Data");
+const db = new Database("Your MongoDB Token");
 
 db.on("ready", () => console.log("ready"));
 
